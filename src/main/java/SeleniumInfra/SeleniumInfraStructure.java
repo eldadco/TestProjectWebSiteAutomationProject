@@ -1,23 +1,35 @@
 package SeleniumInfra;
 
+
+import lombok.Getter;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.nio.file.WatchEvent;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class SeleniumInfraStructure {
+    @Getter
     protected WebDriver driver;
     protected WebDriverWait waitForElems;
     protected JavascriptExecutor js;
     protected ExpectedConditions conditions;
 
     public SeleniumInfraStructure() {
-        System.setProperty("webdriver.chrome.driver", "src\\main\\resources\\chromrDriver\\chromedriver.exe");
+        String osType = System.getProperty("os.name").toLowerCase();
+        String resourceName = "";
+        if (osType.contains("win")) {
+            resourceName = "winChromeDriver.exe";
+        } else if (osType.contains("mac")) {
+            resourceName = "macChromeDriver";
+        } else if (osType.contains("linux")) {
+            resourceName = "linuxChromeDriver";
+        }
+
+        System.setProperty("webdriver.chrome.driver", Objects.requireNonNull(this.getClass().getClassLoader().getResource(resourceName)).getPath());
         this.driver = new ChromeDriver();
         this.waitForElems = new WebDriverWait(this.driver, 40);
         this.js = (JavascriptExecutor) driver;
@@ -60,20 +72,19 @@ public class SeleniumInfraStructure {
         }
     }
 
-    public WebElement findElem(By locator,WebElement fromElement) {
+    public WebElement findElem(By locator, WebElement fromElement) {
 
         try {
-            if(fromElement != null){
+            if (fromElement != null) {
                 return fromElement.findElement(locator);
-            }
-            else{
+            } else {
                 return this.driver.findElement(locator);
             }
 
         } catch (InvalidSelectorException excep) {
-            System.out.println("Selenium-infra error : \t" + "invalid selector located : " + locator );
+            System.out.println("Selenium-infra error : \t" + "invalid selector located : " + locator);
         } catch (NoSuchElementException excep) {
-            System.out.println("Selenium-infra error : No such Element Exception located : " +  locator);
+            System.out.println("Selenium-infra error : No such Element Exception located : " + locator);
 
         } catch (ElementNotVisibleException excep) {
 
@@ -83,24 +94,23 @@ public class SeleniumInfraStructure {
 
     }
 
-    public void clearElementField(By locator, WebElement fromElement, WebElement element){
-        try{
-            if(element == null){
-                element = this.findElem(locator,fromElement);
+    public void clearElementField(By locator, WebElement fromElement, WebElement element) {
+        try {
+            if (element == null) {
+                element = this.findElem(locator, fromElement);
             }
             element.clear();
-        }
-
-        catch (Exception exception){
+        } catch (Exception exception) {
             System.out.println("seleniumInfra error: " + exception.toString());
         }
     }
+
     public String getTextFromElement(By locator, WebElement fromElement, WebElement element) {
         try {
             if (element == null) {
                 element = this.findElem(locator, fromElement);
             }
-            new WebDriverWait(this.driver,5).until(ExpectedConditions.visibilityOf(element));
+            new WebDriverWait(this.driver, 5).until(ExpectedConditions.visibilityOf(element));
             return element.getText();
         } catch (Exception exception) {
             System.out.println("seleniumInfra error " + exception.toString());
@@ -108,7 +118,7 @@ public class SeleniumInfraStructure {
         }
     }
 
-    public void clickElement(By locator, WebElement fromElement,WebElement element) {
+    public void clickElement(By locator, WebElement fromElement, WebElement element) {
         try {
             if (fromElement == null) {
                 element = this.findElem(locator, fromElement);
@@ -120,7 +130,7 @@ public class SeleniumInfraStructure {
         }
     }
 
-    public void writeToElement(By locator,WebElement fromElement, WebElement element, String text) {
+    public void writeToElement(By locator, WebElement fromElement, WebElement element, String text) {
         try {
             if (element == null) {
                 element = this.findElem(locator, fromElement);
